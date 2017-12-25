@@ -37,5 +37,4 @@ def q2():
         q()
     return
 q2()
-rgb.close()
-    
+rgb.close()    
