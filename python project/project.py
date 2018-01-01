@@ -28,17 +28,17 @@ def sep(string): #seperate with seprators
 
     return [x for x in res if x!=""]
 def sepModules(xs): #seprate modules from each other
+    temp=[]
+    res=[]
     for x in xs:
-        res=[]
-        temp=[]
         if x=="module":
             temp=["module"]
         else:
-            if x=="endmodule":
+            if x!="endmodule":
+                temp=temp+[x]
+            else:
                 temp=temp+["endmodule"]
                 res=res+[temp]
-            else:
-                temp=temp+[x]
     return res
 def lineOne(xs): #code ye module ro migire objectesho misaze input output ro ham ezafe mikone tahesh objectesho mide
     modules.addModu(xs[1])
@@ -55,9 +55,54 @@ def lineOne(xs): #code ye module ro migire objectesho misaze input output ro ham
             temp.input(inout[k+1])
         if x=="output":
             temp.output(inout[k+1])
+            a=wire(inout[k+1],len(temp.wires))
+            temp.wires=temp.wires+[a]
         k=k+1
     return temp
+def body(xs,mobject):
+    k = 0
+    for x in xs:
+        if x == ":":
+            xs[k] = ";"
+        k=k+1
+    body=[]
+    temp=[]
+    for x in xs:
+        if x==";":
+            body= body+[temp]
+            temp=[]
+        else:
+            temp=temp+[x]
+    setWires(body,mobject)
+    wireContent(body,mobject)
 
+def setWires(xs,mobject): #give body and add wires
+    for y in xs:
+        k = 0
+        for x in y:
+            if x=="wire":
+                temp=wire(y[k+1],mobject.key)
+                working=mobject
+                working.wires=working.wires+[temp]
+def wireContent(xs,mobject): #give body and module object and set wire contents
+    for x in xs:
+        k=0
+        if len(x)!=3:
+            for y in x:
+                if y=="=":
+                    wireContent=[y[k+1]]+[y[k+2]]+[y[k+3]]
+                    wireName=y[k-1]
+                    wireKey=mobject.wireNameToKey(wireName)
+                    wire=mobject.wires[wireKey]
+                    wire.content(wireContent)
+        if len(x)==3:
+            for y in x:
+                if y=="=":
+                    wireContent=[y[k+1]]
+                    wireName=y[k-1]
+                    wireKey=mobject.wireNameToKey(wireName)
+                    wire=mobject.wires[wireKey]
+                    wire.content(wireContent)
 
 
 class modu:
@@ -68,6 +113,7 @@ class modu:
         x = 0
         x = x + key
         self.key = x
+        self.wires=[]
         self.inp=[]
         self.out=[]
     def input(self,name):
@@ -78,20 +124,68 @@ class modu:
         x = ""
         x = x + name
         self.out = x
+    def wireNameToKey(self,name):
+        for x in self.wires:
+            if x.name== name:
+                return x.key
+    def res(self):
+        r=[[x] for x in self.wires if x.name in self.out]
+        while True:
+            k=0
+            m=0
+            for a in r:
+                l=0
+                for x in a:
+                    if x in self.wires:
+                        r[k][l]=r[k][l].content
+                    l=l+1
+                    m=2
+                k=k+1
+            if m==0:
+                break
+        return r
 class modus:
+    def mnameToKey(self,name):
+        for x in self.modus:
+            if x.name== name:
+                return x.key
+
     def __init__(self):
         self.modus=[]
     def addModu(self,name):
-        key=len(self.modus())
+        key=len(self.modus)
         a=modu(name,key)
         self.modus=self.modus+[a]
         return key
+class wire:
+    def __init__(self,name,key):
+        x=""
+        x=x+name
+        self.name=x
+        x = 0
+        x = x + key
+        self.key=x
+    def content(self,xs):
+        x=[]
+        x=x+["("]+xs+[")"]
+        self.con=x
+    def __str__(self):
+        return self.con
 
 
 
+modules=modus()
 fileName=input("Enter your file name please: ")
 lines=readFile(fileName)
 string=joinLines(lines)
 code=sep(string)
 code=sepModules(code)
-modules=modus()
+print(code)
+m = lineOne(code[0])
+print(modules.modus)
+print(m.out)
+print(m.inp)
+body(code[0],m)
+print(m.wires[0])
+
+

@@ -1,6 +1,5 @@
-asd:asdf
-as,d 
-fa,s
-df;
-asd   
-fasdfasdfas   
+module parham (input a,input b ,output c):
+wire mid1;
+mid1=a&b;
+c=mid1|a;
+endmodule
