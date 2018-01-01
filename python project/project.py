@@ -81,7 +81,7 @@ def setWires(xs,mobject): #give body and add wires
         k = 0
         for x in y:
             if x=="wire":
-                temp=wire(y[k+1],mobject.key)
+                temp=wire(y[k+1],len(mobject.wires))
                 working=mobject
                 working.wires=working.wires+[temp]
 def wireContent(xs,mobject): #give body and module object and set wire contents
@@ -90,19 +90,21 @@ def wireContent(xs,mobject): #give body and module object and set wire contents
         if len(x)!=3:
             for y in x:
                 if y=="=":
-                    wireContent=[y[k+1]]+[y[k+2]]+[y[k+3]]
-                    wireName=y[k-1]
+                    wireContent=[x[k+1]]+[x[k+2]]+[x[k+3]]
+                    wireName=x[k-1]
                     wireKey=mobject.wireNameToKey(wireName)
                     wire=mobject.wires[wireKey]
                     wire.content(wireContent)
+                k=k+1
         if len(x)==3:
             for y in x:
                 if y=="=":
-                    wireContent=[y[k+1]]
-                    wireName=y[k-1]
+                    wireContent=[x[k+1]]
+                    wireName=x[k-1]
                     wireKey=mobject.wireNameToKey(wireName)
                     wire=mobject.wires[wireKey]
                     wire.content(wireContent)
+                k = k + 1
 
 
 class modu:
@@ -138,12 +140,14 @@ class modu:
                 for x in a:
                     if x in self.wires:
                         r[k][l]=r[k][l].content
-                    l=l+1
                     m=2
+                l=l+1
                 k=k+1
             if m==0:
                 break
         return r
+    def __str__(self):
+        return str(self.res())
 class modus:
     def mnameToKey(self,name):
         for x in self.modus:
@@ -165,12 +169,13 @@ class wire:
         x = 0
         x = x + key
         self.key=x
+        self.con=[]
     def content(self,xs):
         x=[]
         x=x+["("]+xs+[")"]
         self.con=x
     def __str__(self):
-        return self.con
+        return str(self.con)
 
 
 
@@ -186,6 +191,10 @@ print(modules.modus)
 print(m.out)
 print(m.inp)
 body(code[0],m)
+x=m.wires[1]
+#wireContent([["mid1","=","a","|","b",";"]], m)
 print(m.wires[0])
+print(m.wires[1])
+print(m.res())
 
 
