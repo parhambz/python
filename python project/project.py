@@ -129,7 +129,8 @@ def createE():
     error.write(title)
     error.write(line)
     return error
-
+def graphMaker(mobject):
+    for x in mobject
 
 class modu:
     def __init__(self, name, key):
@@ -218,6 +219,35 @@ class wire:
 
     def __str__(self):
         return str(self.con)
+class graph:
+    def __init__(self,mname):
+        x=""
+        x=x+mname
+        self.name=x
+        self.vectors=[]
+        self.nodes=[]
+    def addNode(self,type):
+        temp=node(len(self.nodes),type)
+        self.nodes=self.nodes+[temp]
+    def addVector(self,name,begin,des):
+        temp=vector(name,begin,des,len(self.vectors))
+        self.vectors=self.vectors+[temp]
+class node:
+    def __init__(self,id,type):
+        self.type=type[0]
+        x=0
+        x=x+id
+        self.key=x
+class vector:
+    def __init__(self,name,begin,des):
+        x=""
+        x=x+name
+        self.name=x
+        self.begin=begin
+        self.des=des
+        x = 0
+        x = x + id
+        self.key = x
 
 createE()
 modules = modus()
