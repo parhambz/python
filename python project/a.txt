@@ -1,5 +1,10 @@
-module parham (input a,input b ,output c):
-wire mid1;
-mid1=a&b;
+module parham (input a,input b ,output c,output d):
+wire mid1 =
+
+
+
+
+a&b;
 c=mid1|a;
+d=~mid1&b;
 endmodule
