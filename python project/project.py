@@ -1,3 +1,4 @@
+import random
 def readFile(name):  # read file from txt
     try:
         file = open(name, "r")
@@ -59,6 +60,48 @@ def lineOne(xs):  # code ye module ro migire objectesho misaze input output ro h
             temp.wires = temp.wires + [a]
         k = k + 1
     return temp
+def removeP(ys):#remove () and seprate it to line
+    xs=[]
+    xs=xs+ys
+    k=1
+    for x in xs[1:]:
+        m=0
+        a=-1
+        b=1
+        for y in x:
+           if y=="(":
+               a=m
+               break
+           m=m+1
+        m=-1
+        for y in x[::-1]:
+           if y==")":
+               b=m
+               break
+           m=m-1
+        if b!=1  and a!=-1:
+            name=str(random.randrange(10000))
+            p=xs[k][a+1:len(xs[k])+b]
+            xs[k]=xs[k][:a]+[name]+xs[k][1+b+len(xs[k]):]
+            xs=xs[:k]+[["wire",name,"="]+p]+xs[k:]
+            k=k+1
+        k=k+1
+    return xs
+def gnot(ys,mobject):
+    x=[]
+    x=x+ys
+    xs=x
+    k=0
+    for x in xs:
+        m=0
+        for y in x:
+            if y=="~":
+                w=mobject.addWire("*"+x[m+1])
+                w.content(["~",x[m+1]])
+                xs[k]=xs[k][:m]+["*"+xs[k][m+1]]+xs[k][m+2:]
+            m=m+1
+        k=k+1
+    return xs
 def body(xs, mobject):
     k = 0
     for x in xs:
@@ -73,6 +116,9 @@ def body(xs, mobject):
             temp = []
         else:
             temp = temp + [x]
+    body=removeP(body)
+    body=gnot(body,mobject)
+    mobject.body(body)
     setWires(body, mobject)
     wireContent(body, mobject)
 def setWires(xs, mobject):  # give body and add wires
@@ -87,6 +133,12 @@ def wireContent(xs, mobject):  # give body and module object and set wire conten
     for x in xs:
         k = 0
         for y in x:
+            '''if y=="~":
+                wireContent=["~"]+[x[k+1]]
+                wireName="~"+x[k+1]
+                wireKey = mobject.wireNameToKey(wireName)
+                wire=mobject.wires[wireKey]
+                wire.content(wireContent)'''
             if y == "=":
                 wireContent = x[k + 1:]
                 wireName = x[k - 1]
@@ -130,7 +182,27 @@ def createE():
     error.write(line)
     return error
 def graphMaker(mobject):
-    for x in mobject
+    g=graph(mobject.name)
+    op=["&","|"]
+    k=0
+    for x in mobject.body:
+        m=0
+        for y in x :
+            if y =="=":
+                if len(x)==5:
+                    n=g.addNode(x[m+2])
+                    n.addV(x[m-1])
+                    n.addV(x[m +3])
+                    n.addV(x[m +1])
+                if len(x)==3:
+                    n = g.addNode(x[m])
+                    n.addV(x[m - 1])
+                    n.addV(x[m + 1])
+
+            m=m+1
+        k=k+1
+
+
 
 class modu:
     def __init__(self, name, key):
@@ -143,7 +215,10 @@ class modu:
         self.wires = []
         self.inp = []
         self.out = []
-
+    def body(self,body):
+        x=[]
+        x=x+body
+        self.body=x
     def input(self, name):
         x = ""
         x = x + name
@@ -179,7 +254,10 @@ class modu:
             if m == 0:
                 break
         return r
-
+    def addWire(self,wname):
+        w= wire(wname,len(self.wires))
+        self.wires=self.wires+[w]
+        return w
     def __str__(self):
         result = []
         for x in self.res():
@@ -203,7 +281,7 @@ class modus:
         self.modus = self.modus + [a]
         return key
 class wire:
-    def __init__(self, name, key):
+    def __init__(self, name, key,ng=False):
         x = ""
         x = x + name
         self.name = x
@@ -238,16 +316,21 @@ class node:
         x=0
         x=x+id
         self.key=x
+        self.vector=[]
+    def addV(self,name):
+        v=vector(name)
+        self.vector=self.vector+[v]
+        return v
 class vector:
-    def __init__(self,name,begin,des):
+    def __init__(self,name):
         x=""
         x=x+name
         self.name=x
-        self.begin=begin
-        self.des=des
         x = 0
         x = x + id
         self.key = x
+        self.node=[]
+
 
 createE()
 modules = modus()
@@ -268,3 +351,4 @@ print(m.wires[0])
 print(m.wires[1])
 print(m.out)
 print(m)
+
