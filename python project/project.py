@@ -1,4 +1,5 @@
 import random
+
 def readFile(name):  # read file from txt
     try:
         file = open(name, "r")
@@ -87,6 +88,26 @@ def removeP(ys):#remove () and seprate it to line
             k=k+1
         k=k+1
     return xs
+def removeC(string):
+    while True:
+        k=0
+        z=-2
+        for x in string:
+            if x=="/" and string[k+1]=="/":
+                a=k
+                z=2
+                break
+            k=k+1
+            
+        m=0
+        for x in string[a+1:]:
+            if x=="\n":
+                b=m
+                break
+            m=m+1
+        if z==-2:
+            break
+        return string[:a]+string[a+b+1:]
 def gnot(ys,mobject):
     x=[]
     x=x+ys
@@ -164,11 +185,7 @@ def wireContent(xs, mobject):  # give body and module object and set wire conten
                     wire=mobject.wires[wireKey]
                     wire.content(wireContent)
                 k = k + 1'''
-def errorSet(enum,file):  # give error num and write in txt and exit
-    if enum==1:
-        file.write("error code : 1")
-def createE():
-    error=open("error.txt","w")
+def createE(error):
     l=["=" for x in range(125)]+["\n"]
     line=""
     for x in l:
@@ -181,7 +198,7 @@ def createE():
     error.write(title)
     error.write(line)
     return error
-def graphMaker(mobject):
+def graphMaker(mobject):#give an object and return graph for it
     g=graph(mobject.name)
     op=["&","|"]
     k=0
@@ -189,19 +206,79 @@ def graphMaker(mobject):
         m=0
         for y in x :
             if y =="=":
-                if len(x)==5:
+                if len(x)==5 or len(x)==6:
                     n=g.addNode(x[m+2])
-                    n.addV(x[m-1])
-                    n.addV(x[m +3])
-                    n.addV(x[m +1])
-                if len(x)==3:
+                    g.addVector(x[m-1],n)
+                    g.addVector(x[m +3],n)
+                    g.addVector(x[m +1],n)
+                if len(x)==3 or len(x)==4:
                     n = g.addNode(x[m])
-                    n.addV(x[m - 1])
-                    n.addV(x[m + 1])
+                    g.addVector(x[m - 1],n)
+                    g.addVector(x[m + 1],n)
 
             m=m+1
         k=k+1
+    k=0
+    for x in g.vectors:
+        if x.name[0]=="*":
+            temp=x.node[0]
+            no=g.addNode("~")
+            x.node=x.node[1:]+[no]
+            no.vector=no.vector+[x]
+            v=g.addVector(x.name[1:],temp)
+            v.node=v.node+[no]
+            no.vector=no.vector+[v]
+        k=k+1
+    return g
+'''def lineNumber(string):
+    for x in string:
+        if x=="\n":
+            string=string[]+";+"+str(m)+";"+string[]'''
+def setE(msg,line):
+    global errorFile
+    errorFile.write(msg+"line :"+line)
+def findLine(xs,andis):
+    for x in xs[andis:]:
+        '''if x[0]=="+" :
+            return x[1:]'''
+        return "0"
+def moduleCheck(xs):
+    if xs[0]!="module":
+        setE("should start with 'module'",findLine(xs,0))
+        return False
+    if xs[-1]!="endmodule":
+        setE("module should end with 'endmodule'",findLine(xs,-1))
+    name=xs[1]
+    if ord(name[0]) not in [x for x in range(97,123)]:
+        setE("module should start with a-z only",findLine(xs,1))
+        return False
+    def nameChek(xs,name,andis):
+        for x in name:
+            if ord(x)>122 or ord(x)<65:
+                if x=="_":
+                    pass
+                else:
+                    if x in [str(y) for y in range(10)]:
+                        pass
+                    else:
+                        setE("invalid wire name: "+name,findLine(xs,andis))
+                        return False
 
+    if xs[2]!="(":
+        setE("unexpected-> '"+xs[2]+"'/ expect-> '('",findLine(xs,2))
+        return False
+    k=0
+    '''for x in xs :
+        if x==";":
+            if xs[k-1]!=")":
+                setE("unexpected :"+xs[k-1],findLine(xs,k))
+                return False
+        k=k+1'''
+    k=0
+    for x in xs:
+        if x=="wire":
+            nameChek(xs,xs[k+1],k+1)
+        k=k+1
 
 
 class modu:
@@ -307,9 +384,22 @@ class graph:
     def addNode(self,type):
         temp=node(len(self.nodes),type)
         self.nodes=self.nodes+[temp]
-    def addVector(self,name,begin,des):
-        temp=vector(name,begin,des,len(self.vectors))
-        self.vectors=self.vectors+[temp]
+        return temp
+    def addVector(self,name,n):
+        if name not in [x.name for x in self.vectors]:
+            v = vector(name,n,len(self.vectors))
+            n.vector=n.vector+[v]
+            self.vectors = self.vectors + [v]
+            return v
+        k = 0
+        for x in self.vectors:
+            if x.name == name:
+                break
+            k = k + 1
+        v = self.vectors[k]
+        n.vector = n.vector + [v]
+        v.node=v.node+[n]
+        return v
 class node:
     def __init__(self,id,type):
         self.type=type[0]
@@ -317,28 +407,30 @@ class node:
         x=x+id
         self.key=x
         self.vector=[]
-    def addV(self,name):
-        v=vector(name)
-        self.vector=self.vector+[v]
-        return v
 class vector:
-    def __init__(self,name):
+    def __init__(self,name,n,key):
         x=""
         x=x+name
         self.name=x
         x = 0
-        x = x + id
+        x = x + key
         self.key = x
         self.node=[]
+        self.node=self.node+[n]
 
 
-createE()
 modules = modus()
+errorFile=open("result.data.txt","w")
+createE(errorFile)
 fileName = input("Enter your file name please: ")
 lines = readFile(fileName)
 string = joinLines(lines)
+#string=lineNumber(string)
+print(removeC(string))
+
 code = sep(string)
 code = sepModules(code)
+moduleCheck(code[0])
 print(code)
 m = lineOne(code[0])
 print(modules.modus)
@@ -351,4 +443,7 @@ print(m.wires[0])
 print(m.wires[1])
 print(m.out)
 print(m)
+g=graphMaker(m)
+print(g.nodes)
+errorFile.close()
 
