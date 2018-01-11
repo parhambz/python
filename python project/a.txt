@@ -1,5 +1,5 @@
 module parham (input a,input b ,output c,output d):
-wire 1id1 =b&(a&b);//asdjkahdlkasdalsda
+wire nid1 =b&(a&b);//asdjkahdlkasdalsda
 
 c=(mid1|a);
 d=~mid1&b;

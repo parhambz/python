@@ -185,7 +185,9 @@ def wireContent(xs, mobject):  # give body and module object and set wire conten
                     wire=mobject.wires[wireKey]
                     wire.content(wireContent)
                 k = k + 1'''
-def createE(error):
+def createE():
+    global errorFile
+    error = errorFile
     l=["=" for x in range(125)]+["\n"]
     line=""
     for x in l:
@@ -236,13 +238,19 @@ def graphMaker(mobject):#give an object and return graph for it
             string=string[]+";+"+str(m)+";"+string[]'''
 def setE(msg,line):
     global errorFile
-    errorFile.write(msg+"line :"+line)
+    errorFile.write("Error : "+msg+" line :"+line+"\n")
+def setW(msg):
+    global errorFile
+    errorFile.write("Warning : "+msg+"\n")
 def findLine(xs,andis):
     for x in xs[andis:]:
         '''if x[0]=="+" :
             return x[1:]'''
         return "0"
-def moduleCheck(xs):
+def moduleCheckEW1(xs):
+    sep=[" ", "(", ")", ":", ";", "=", ",", "&", "|", "~", "\n","input","output","wire","module","endmodule"]
+    o=0
+    global m
     if xs[0]!="module":
         setE("should start with 'module'",findLine(xs,0))
         return False
@@ -253,6 +261,10 @@ def moduleCheck(xs):
         setE("module should start with a-z only",findLine(xs,1))
         return False
     def nameChek(xs,name,andis):
+        global errorFile
+        if ord(name[0]) not in range(97,123):
+            setE("invalid wire name: " + name, findLine(xs, andis))
+            return False
         for x in name:
             if ord(x)>122 or ord(x)<65:
                 if x=="_":
@@ -279,6 +291,58 @@ def moduleCheck(xs):
         if x=="wire":
             nameChek(xs,xs[k+1],k+1)
         k=k+1
+    k = 0
+    for x in xs[2:]:
+        if x == ":":
+            a = k
+        k = k + 1
+    wirelist = []
+    for x in xs[a + 1:]:
+        if x not in sep:
+            wirelist = wirelist + [x]
+    for x in wirelist:
+        if x not in [y.name for y in m.wires]:
+            setE("wire " + x + " not defined", findLine(xs,0))
+            return False
+    for x in m.wires:
+        if x.name not in wirelist:
+            setW("wire " + x + " not used")
+            o=2
+
+
+    if o==0:
+        errorFile.write("OK")
+def writeGraph(g):
+    global errorFile
+    res="\n Vectors : \n"
+    for x in g.vectors:
+        res =res+x.name+" nodes : "
+        for y in x.node:
+            res=res+str(y.key)+"("+y.type+")"+","
+        res=res[0:-1]+"\n"
+    res=res+" Nodes : \n"
+    for x in g.nodes:
+        res=res+str(x.key)+"("+x.type+")"+ " Vectors : "
+        for y in x.vector:
+            res=res+y.name+","
+        res=res[0:-1]+"\n"
+    errorFile.write(res)
+def createR():
+    global errorFile
+    error=errorFile
+    l=["=" for x in range(125)]+["\n"]
+    line=""
+    for x in l:
+        line=line+x
+    error.write("\n")
+    error.write(line)
+    l=["*"]+[" " for x in range(55)]+["Circuit Graph"]+[" " for x in range(55)]+["*"]+["\n"]
+    title=""
+    for x in l:
+        title=title+x
+    error.write(title)
+    error.write(line)
+    return error
 
 
 class modu:
@@ -419,31 +483,35 @@ class vector:
         self.node=self.node+[n]
 
 
-modules = modus()
-errorFile=open("result.data.txt","w")
-createE(errorFile)
 fileName = input("Enter your file name please: ")
+modules = modus()
+errorFile=open("result.data","w")
+createE()
 lines = readFile(fileName)
 string = joinLines(lines)
-#string=lineNumber(string)
-print(removeC(string))
-
+string=removeC(string)
 code = sep(string)
 code = sepModules(code)
-moduleCheck(code[0])
-print(code)
 m = lineOne(code[0])
+if moduleCheckEW1(code[0])!=False:
+    body(code[0], m)
+    g=graphMaker(m)
+    createR()
+    writeGraph(g)
+errorFile.close()
+
+
+'''print(g.nodes)
+#string=lineNumber(string)
+print(code)
 print(modules.modus)
 print(m.out)
 print(m.inp)
-body(code[0], m)
 x = m.wires[1]
 # wireContent([["mid1","=","a","|","b",";"]], m)
 print(m.wires[0])
 print(m.wires[1])
 print(m.out)
-print(m)
-g=graphMaker(m)
-print(g.nodes)
-errorFile.close()
+print(m)'''
+
 
